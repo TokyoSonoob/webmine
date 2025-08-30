@@ -246,14 +246,21 @@
 
     // remote stream
     remoteStream = new MediaStream();
-    remoteAudioEl.srcObject = remoteStream;
+  remoteAudioEl.srcObject = remoteStream;
+  remoteAudioEl.muted = false;          // สำคัญ: ห้าม mute ไม่งั้นจะไม่ได้ยิน
+  remoteAudioEl.volume = 1.0;           // กันกรณี volume = 0
+  remoteAudioEl.playsInline = true;
 
     pc.ontrack = (ev)=>{
-      try{ ev.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t)); }catch{}
-      remoteAudioEl.classList.remove('hidden');
-      remoteAudioEl.play?.().catch(()=>{});
-    };
-    pc.onconnectionstatechange = ()=> log('สถานะ: '+pc.connectionState);
+    try { remoteStream.addTrack(ev.track); } catch {}
+    remoteAudioEl.classList.remove('hidden');
+    remoteAudioEl.play?.().catch(()=>{});   // บางเบราว์เซอร์ต้องเรียกหลัง user gesture
+  };
+
+  pc.oniceconnectionstatechange = () => {
+    console.log('ICE:', pc.iceConnectionState);
+    // ถ้า 'failed' บ่อย → ต้องใส่ TURN server
+  };
 
     // ทำ m-line audio sendrecv ตั้งแต่แรก
     const trans = pc.addTransceiver('audio', { direction: 'sendrecv' });
