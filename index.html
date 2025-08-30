@@ -21,69 +21,47 @@
     .bigcode{font-size:28px;font-weight:800;letter-spacing:.12em}
     .status{white-space:pre-wrap;background:#0e162b;border:var(--bd);border-radius:12px;padding:10px;font-family:ui-monospace,Consolas,Monaco;min-height:64px}
     .hidden{display:none !important}
-    /* ✨ effects */
-    .shine{position:relative;overflow:hidden}
-    .shine::after{content:"";position:absolute;inset:-150% -30%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.18),transparent);transform:rotate(25deg);animation:shine 2.6s infinite}
-    @keyframes shine{0%{transform:translateX(-120%) rotate(25deg)}100%{transform:translateX(120%) rotate(25deg)}}
-    .float{animation:float 6s ease-in-out infinite}
-    @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
-    .fadein{animation:fade .5s ease both}
-    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-    .glow{box-shadow:0 0 0 0 rgba(124,58,237,.35);animation:glow 2.8s ease-in-out infinite}
-    @keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,.28)}50%{box-shadow:0 0 30px 6px rgba(124,58,237,.28)}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="logo glow float"></div>
+      <div class="logo"></div>
       <h1>สมัคร/เข้าสู่ระบบ → สร้าง/เข้าห้อง → คุยเสียง</h1>
     </header>
 
     <!-- REGISTER -->
-    <section id="registerCard" class="card fadein">
+    <section id="registerCard" class="card">
       <h3>สมัครสมาชิก</h3>
-      <div class="row">
-        <div class="grow">
-          <label>อีเมล</label>
-          <input id="regEmail" type="email" placeholder="you@example.com" />
-          <label>รหัสผ่าน</label>
-          <input id="regPass" type="password" placeholder="อย่างน้อย 6 ตัวอักษร" />
-          <label>ชื่อ Xbox</label>
-          <input id="regXbox" placeholder="เช่น SeaMuww" />
-          <div class="row"><button id="btnRegister" class="shine">สมัคร</button><button id="toLogin" class="ghost">มีบัญชีแล้ว? เข้าสู่ระบบ</button></div>
-        </div>
-        <div class="grow">
-          <div class="muted">บันทึก:</div>
-          <ul class="muted" style="margin:6px 0 0 18px">
-            <li>Firebase Auth (อีเมล/รหัสผ่าน)</li>
-            <li>ชื่อ Xbox เก็บในโปรไฟล์ + คอลเลกชัน <code>users</code></li>
-            <li>WebRTC ต้องรันบน HTTPS หรือ localhost</li>
-          </ul>
-        </div>
-      </div>
+      <label>อีเมล</label>
+      <input id="regEmail" type="email" placeholder="you@example.com" />
+      <label>รหัสผ่าน</label>
+      <input id="regPass" type="password" placeholder="อย่างน้อย 6 ตัวอักษร" />
+      <label>ชื่อ Xbox</label>
+      <input id="regXbox" placeholder="เช่น SeaMuww" />
+      <div class="row"><button id="btnRegister">สมัคร</button><button id="toLogin" class="ghost">มีบัญชีแล้ว? เข้าสู่ระบบ</button></div>
     </section>
 
     <!-- LOGIN -->
-    <section id="loginCard" class="card hidden fadein">
+    <section id="loginCard" class="card hidden">
       <h3>เข้าสู่ระบบ</h3>
       <label>อีเมล</label>
       <input id="logEmail" type="email" />
       <label>รหัสผ่าน</label>
       <input id="logPass" type="password" />
-      <div class="row"><button id="btnLogin" class="shine">เข้าสู่ระบบ</button><button id="toRegister" class="ghost">ยังไม่มีบัญชี? สมัครสมาชิก</button></div>
+      <div class="row"><button id="btnLogin">เข้าสู่ระบบ</button><button id="toRegister" class="ghost">ยังไม่มีบัญชี? สมัครสมาชิก</button></div>
     </section>
 
     <!-- LOBBY -->
-    <section id="lobbyCard" class="card hidden fadein">
+    <section id="lobbyCard" class="card hidden">
       <div class="row" style="justify-content:space-between;align-items:center">
         <div class="tag">สวัสดี <strong id="helloName">—</strong></div>
         <button id="btnLogout" class="ghost">ออกจากระบบ</button>
       </div>
       <div class="row" style="margin-top:10px">
         <div class="grow">
-          <h3 style="margin:0 0 6px">สร้างห้องใหม่</h3>
-          <button id="btnCreate" class="shine">สร้างรหัสห้องและเข้า</button>
+          <h3>สร้างห้องใหม่</h3>
+          <button id="btnCreate">สร้างรหัสห้องและเข้า</button>
           <div id="createdBox" class="hidden" style="margin-top:10px">
             <div class="muted">แชร์รหัสนี้ให้เพื่อน</div>
             <div class="bigcode" id="roomCode">— — — —</div>
@@ -91,248 +69,266 @@
           </div>
         </div>
         <div class="grow">
-          <h3 style="margin:0 0 6px">เข้าห้องที่มีอยู่แล้ว</h3>
+          <h3>เข้าห้องที่มีอยู่แล้ว</h3>
           <label>รหัสห้อง (6 หลัก)</label>
           <input id="joinCode" maxlength="6" inputmode="numeric" placeholder="493120" />
-          <div style="height:8px"></div>
-          <button id="btnJoin" class="secondary shine">เข้าห้อง</button>
+          <button id="btnJoin" class="secondary">เข้าห้อง</button>
         </div>
       </div>
     </section>
 
     <!-- IN-ROOM -->
-    <section id="roomCard" class="card hidden fadein">
+    <section id="roomCard" class="card hidden">
       <div class="row" style="justify-content:space-between;align-items:center">
         <div class="tag">รหัสห้อง: <strong id="roomLabel">—</strong></div>
         <div class="row">
-          <button id="btnToggleMic" class="shine">🎙️ เปิดไมค์</button>
+          <button id="btnToggleMic">🎙️ เปิดไมค์</button>
           <button id="btnLeave" class="ghost">ออกจากห้อง</button>
         </div>
       </div>
-      <div style="height:8px"></div>
       <div class="muted">สถานะ</div>
       <div id="status" class="status">เริ่มต้น…</div>
       <audio id="remoteAudio" autoplay playsinline class="hidden"></audio>
     </section>
 
-    <div class="muted" style="text-align:center;margin-top:8px">Make by Purple Shop · Firebase Auth + Firestore Signaling · WebRTC (Audio)</div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js">// ===== UI ELEMENTS =====
+const registerCard = document.querySelector('#registerCard');
+const loginCard    = document.querySelector('#loginCard');
+const lobbyCard    = document.querySelector('#lobbyCard');
+const roomCard     = document.querySelector('#roomCard');
+const createdBox   = document.querySelector('#createdBox');
+
+const helloName    = document.querySelector('#helloName');
+const btnRegister  = document.querySelector('#btnRegister');
+const btnLogin     = document.querySelector('#btnLogin');
+const btnLogout    = document.querySelector('#btnLogout');
+const toLogin      = document.querySelector('#toLogin');
+const toRegister   = document.querySelector('#toRegister');
+
+const btnCreate    = document.querySelector('#btnCreate');
+const btnJoin      = document.querySelector('#btnJoin');
+const btnCopy      = document.querySelector('#btnCopy');
+const joinCode     = document.querySelector('#joinCode');
+
+const roomLabel    = document.querySelector('#roomLabel');
+const roomCodeEl   = document.querySelector('#roomCode');
+const btnLeave     = document.querySelector('#btnLeave');
+
+// ===== AUTH UI =====
+
+toLogin.onclick = ()=>{ show(registerCard,false); show(loginCard,true); };
+
+toRegister.onclick = ()=>{ show(loginCard,false); show(registerCard,true); };
+
+btnRegister.onclick = async ()=>{
+  const email = document.querySelector('#regEmail').value.trim();
+  const pass  = document.querySelector('#regPass').value.trim();
+  const xbox  = document.querySelector('#regXbox').value.trim();
+  if(!email||!pass||!xbox) return alert('กรอกข้อมูลให้ครบ');
+  try{
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: xbox });
+    await db.collection('users').doc(cred.user.uid).set({ email, xbox, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert('สมัครสำเร็จ! เข้าสู่ระบบให้แล้ว');
+  }catch(e){ alert(e.message); }
+};
+
+btnLogin.onclick = async ()=>{
+  const email = document.querySelector('#logEmail').value.trim();
+  const pass  = document.querySelector('#logPass').value.trim();
+  if(!email||!pass) return alert('กรอกอีเมลและรหัสผ่าน');
+  try{ await auth.signInWithEmailAndPassword(email, pass); }catch(e){ alert(e.message); }
+};
+
+btnLogout.onclick = ()=> auth.signOut();
+
+auth.onAuthStateChanged((user)=>{
+  if(user){
+    helloName.textContent = user.displayName || user.email;
+    show(registerCard,false); show(loginCard,false); show(lobbyCard,true); show(roomCard,false);
+  }else{
+    show(lobbyCard,false); show(roomCard,false); show(loginCard,true); show(registerCard,false);
+  }
+});
+
+// ===== UTILS =====
+const randRoomCode = ()=> (Math.floor(100000+Math.random()*900000)).toString();
+
+// ===== ROOM LOGIC =====
+async function createRoomAndJoin(){
+  try{
+    const code = randRoomCode();
+    roomRef = db.collection('rooms').doc(code);
+
+    createdByMe = true;
+    roomLabel.textContent = code;
+    roomCodeEl.textContent = code;
+    show(createdBox,true);
+
+    await createPeer(true);
+
+    const callerCandidates = roomRef.collection('callerCandidates');
+    pc.onicecandidate = (e)=>{ if(e.candidate) callerCandidates.add(e.candidate.toJSON()); };
+
+    const offer = await pc.createOffer({ offerToReceiveAudio: 1 });
+    await pc.setLocalDescription(offer);
+
+    const profile = { uid:auth.currentUser.uid, name:auth.currentUser.displayName||auth.currentUser.email };
+
+    await roomRef.set({
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: { ...profile, joinedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      offer: { type: offer.type, sdp: offer.sdp },
+      members: [ profile ],
+      lastJoin: { [profile.uid]: firebase.firestore.FieldValue.serverTimestamp() }
+    });
+
+    unsubAnswer = roomRef.onSnapshot(async (snap)=>{
+      const data = snap.data();
+      if(!pc.currentRemoteDescription && data && data.answer){
+        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+        log('✅ เชื่อมต่อแล้ว (answer)');
+      }
+    });
+
+    unsubCallee = roomRef.collection('calleeCandidates').onSnapshot((snap)=>{
+      snap.docChanges().forEach((c)=>{ if(c.type==='added'){ pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); } });
+    });
+
+    show(lobbyCard,false); show(roomCard,true); log('🎉 ห้อง '+code+' ถูกสร้างแล้วและเข้าห้องอัตโนมัติ');
+  }catch(err){ console.error(err); alert('สร้างห้องไม่สำเร็จ: '+(err.message||err)); }
+}
+
+async function joinRoomByCode(){
+  try{
+    const code = (joinCode.value||'').trim(); if(code.length!==6) return alert('กรอกรหัส 6 หลัก');
+    roomRef = db.collection('rooms').doc(code); const snap = await roomRef.get(); if(!snap.exists) return alert('ไม่พบห้อง');
+
+    roomLabel.textContent = code; show(lobbyCard,false); show(roomCard,true);
+
+    await createPeer(false);
+
+    const calleeCandidates = roomRef.collection('calleeCandidates');
+    pc.onicecandidate = (e)=>{ if(e.candidate) calleeCandidates.add(e.candidate.toJSON()); };
+
+    const data = snap.data();
+    await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    const profile = { uid:auth.currentUser.uid, name:auth.currentUser.displayName||auth.currentUser.email };
+
+    await roomRef.update({
+      answer: { type: answer.type, sdp: answer.sdp },
+      members: firebase.firestore.FieldValue.arrayUnion(profile),
+      ["lastJoin."+profile.uid]: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    unsubCaller = roomRef.collection('callerCandidates').onSnapshot((snap)=>{
+      snap.docChanges().forEach((c)=>{ if(c.type==='added'){ pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); } });
+    });
+
+  }catch(err){ console.error(err); alert('เข้าห้องไม่สำเร็จ: '+(err.message||err)); }
+}
+
+async function leaveRoom(){
+  try{
+    setMic(false);
+    if(pc){ pc.getSenders().forEach(s=>{ try{s.track&&s.track.stop();}catch{} }); pc.close(); }
+    pc=null; if(unsubAnswer)unsubAnswer(); if(unsubCaller)unsubCaller(); if(unsubCallee)unsubCallee(); unsubAnswer=unsubCaller=unsubCallee=null;
+    if(createdByMe && roomRef){ try{ await roomRef.delete(); }catch{} }
+  } finally { show(roomCard,false); show(lobbyCard,true); log('👋 ออกจากห้องแล้ว'); }
+}
+
+// ===== WIRE BUTTONS =====
+btnCreate.onclick = createRoomAndJoin;
+btnJoin.onclick   = joinRoomByCode;
+btnCopy.onclick   = ()=> navigator.clipboard?.writeText(roomCodeEl.textContent).catch(()=>{});
+btnLeave.onclick  = leaveRoom;
+</script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-  'use strict';
-  // ===== 0) CONFIG =====
   const firebaseConfig = {
-    apiKey: "AIzaSyBswfpiFSZaeHaEKT0RQcsTJMlgdqN8j2A",
-    authDomain: "webxxx-c2c15.firebaseapp.com",
-    databaseURL: "https://webxxx-c2c15-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "webxxx-c2c15",
-    storageBucket: "webxxx-c2c15.appspot.com",
-    messagingSenderId: "1067079003521",
-    appId: "1:1067079003521:web:a3869d6f857e49fb490c80",
-    measurementId: "G-7VGKRTCCSF"
-  };
-
-  // ===== 1) BOOT =====
-  const app = firebase.initializeApp(firebaseConfig);
+  apiKey: "AIzaSyBswfpiFSZaeHaEKT0RQcsTJMlgdqN8j2A",
+  authDomain: "webxxx-c2c15.firebaseapp.com",
+  databaseURL: "https://webxxx-c2c15-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "webxxx-c2c15",
+  storageBucket: "webxxx-c2c15.appspot.com",
+  messagingSenderId: "1067079003521",
+  appId: "1:1067079003521:web:a3869d6f857e49fb490c80",
+  measurementId: "G-7VGKRTCCSF"
+};
+  firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
-  const db   = firebase.firestore();
+  const db = firebase.firestore();
   db.enableNetwork().catch(()=>{});
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 
-  // ===== 2) HELPERS =====
   const $ = (s)=>document.querySelector(s);
-  const show = (el,on=true)=>el.classList.toggle('hidden',!on);
-  const copy = (t)=>navigator.clipboard?.writeText(t).catch(()=>{});
-  const log = (m)=>{ const box=$('#status'); if(box){ box.textContent += "\n"+m; box.scrollTop = box.scrollHeight; } console.log(m); };
-  if(location.protocol!=='https:' && location.hostname!=='localhost'){
-    alert('ต้องเปิดผ่าน HTTPS หรือ localhost เพื่อใช้งานไมค์ครับ');
-  }
+  const show=(el,on=true)=>el.classList.toggle('hidden',!on);
+  const log=(m)=>{const box=$('#status'); if(box){box.textContent+="\n"+m; box.scrollTop=box.scrollHeight;} console.log(m)};
 
-  // sections & controls
-  const registerCard=$('#registerCard'), loginCard=$('#loginCard'), lobbyCard=$('#lobbyCard'), roomCard=$('#roomCard');
-  const helloName=$('#helloName');
-  const btnCreate=$('#btnCreate'), btnJoin=$('#btnJoin'), btnCopy=$('#btnCopy');
-  const btnRegister=$('#btnRegister'), btnLogin=$('#btnLogin'), btnLogout=$('#btnLogout'), toLogin=$('#toLogin'), toRegister=$('#toRegister');
-  const joinCode=$('#joinCode'), btnToggleMic=$('#btnToggleMic'), btnLeave=$('#btnLeave'), roomLabel=$('#roomLabel'), roomCodeEl=$('#roomCode');
-  const remoteAudioEl=$('#remoteAudio');
-
-  // ===== 3) AUTH =====
-  toLogin.onclick = ()=>{ show(registerCard,false); show(loginCard,true); };
-  toRegister.onclick = ()=>{ show(loginCard,false); show(registerCard,true); };
-
-  btnRegister.onclick = async ()=>{
-    const email=$('#regEmail').value.trim();
-    const pass=$('#regPass').value.trim();
-    const xbox=$('#regXbox').value.trim();
-    if(!email||!pass||!xbox) return alert('กรอกข้อมูลให้ครบ');
-    try{
-      const cred=await auth.createUserWithEmailAndPassword(email,pass);
-      await cred.user.updateProfile({displayName:xbox});
-      await db.collection('users').doc(cred.user.uid).set({
-        email, xbox, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      alert('สมัครสำเร็จ! เข้าสู่ระบบให้แล้ว');
-    }catch(err){ alert(err.message); }
-  };
-
-  btnLogin.onclick = async ()=>{
-    const email=$('#logEmail').value.trim();
-    const pass=$('#logPass').value.trim();
-    if(!email||!pass) return alert('กรอกอีเมลและรหัสผ่าน');
-    try{ await auth.signInWithEmailAndPassword(email,pass); }catch(err){ alert(err.message); }
-  };
-
-  btnLogout.onclick = ()=> auth.signOut();
-
-  auth.onAuthStateChanged((user)=>{
-    if(user){
-      helloName.textContent = user.displayName || user.email;
-      show(registerCard,false); show(loginCard,false); show(lobbyCard,true); show(roomCard,false);
-    }else{
-      show(lobbyCard,false); show(roomCard,false); show(loginCard,true); show(registerCard,false);
-    }
-  });
-
-  // ===== 4) WEBRTC =====
-  const rtcConfig = { iceServers:[{ urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302'] }], iceCandidatePoolSize:10 };
   let pc=null, localStream=null, remoteStream=null, roomRef=null;
-  let unsubAnswer=null, unsubCaller=null, unsubCallee=null;
+  let unsubAnswer=null,unsubCaller=null,unsubCallee=null;
   let createdByMe=false, micOn=false;
+  let audioSender=null;
 
-  const randRoomCode = ()=> (Math.floor(100000+Math.random()*900000)).toString();
+  const rtcConfig = { iceServers:[{ urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302'] }], iceCandidatePoolSize:10 };
 
-  const ensureMic = async ()=>{
-    if(!localStream){
-      try{ localStream = await navigator.mediaDevices.getUserMedia({ audio:true }); }
-      catch(e){ alert('เปิดไมค์ไม่สำเร็จ: '+e.message); throw e; }
-    }
+  async function ensureMic(){
+    if(!localStream){localStream=await navigator.mediaDevices.getUserMedia({audio:true});}
     return localStream;
-  };
+  }
 
   async function createPeer(capture=false){
-    pc = new RTCPeerConnection(rtcConfig);
-    remoteStream = new MediaStream();
-    remoteAudioEl.srcObject = remoteStream;
+    pc=new RTCPeerConnection(rtcConfig);
+    remoteStream=new MediaStream();
+    $('#remoteAudio').srcObject=remoteStream;
 
-    pc.ontrack = (ev)=>{ try{ ev.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t)); }catch{}; remoteAudioEl.classList.remove('hidden'); };
-    pc.onconnectionstatechange = ()=> log('สถานะ: '+pc.connectionState);
+    pc.ontrack=(ev)=>{
+      ev.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t));
+      $('#remoteAudio').classList.remove('hidden');
+      $('#remoteAudio').play?.().catch(()=>{});
+    };
+    pc.onconnectionstatechange=()=> log('สถานะ: '+pc.connectionState);
+
+    // ใช้ transceiver sendrecv สำหรับ audio
+    const trans=pc.addTransceiver('audio',{direction:'sendrecv'});
+    audioSender=trans.sender;
 
     if(capture){
-      const s = await ensureMic();
-      s.getAudioTracks().forEach(t=>{ t.enabled=false; pc.addTrack(t,s); });
+      const s=await ensureMic();
+      const track=s.getAudioTracks()[0];
+      track.enabled=false;
+      await audioSender.replaceTrack(track);
     } else {
-      try{ pc.addTransceiver('audio',{direction:'recvonly'}); }catch{}
+      await audioSender.replaceTrack(null);
     }
   }
 
-  // === สร้าง → บันทึก Firestore → เข้าอัตโนมัติ ===
-  async function createRoomAndJoin(){
+  function setMic(on){if(!localStream) return;localStream.getAudioTracks().forEach(t=>t.enabled=on);micOn=on;$('#btnToggleMic').textContent=on?'🔇 ปิดไมค์':'🎙️ เปิดไมค์';}
+
+  $('#btnToggleMic').onclick=async()=>{
     try{
-      const code = randRoomCode();
-      roomRef = db.collection('rooms').doc(code);
-
-      createdByMe = true; roomLabel.textContent = code; roomCodeEl.textContent = code; show(document.querySelector('#createdBox'),true);
-
-      await createPeer(true);
-
-      const callerCandidates = roomRef.collection('callerCandidates');
-      pc.onicecandidate = (e)=>{ if(e.candidate) callerCandidates.add(e.candidate.toJSON()); };
-
-      const offer = await pc.createOffer({offerToReceiveAudio:1});
-      await pc.setLocalDescription(offer);
-
-      const profile = { uid:auth.currentUser.uid, name:auth.currentUser.displayName||auth.currentUser.email };
-
-      await roomRef.set({
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        createdBy: { ...profile, joinedAt: firebase.firestore.FieldValue.serverTimestamp() },
-        offer: { type: offer.type, sdp: offer.sdp },
-        members: [ profile ],
-        lastJoin: { [profile.uid]: firebase.firestore.FieldValue.serverTimestamp() }
-      });
-
-      unsubAnswer = roomRef.onSnapshot(async (snap)=>{
-        const data=snap.data();
-        if(!pc.currentRemoteDescription && data && data.answer){
-          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-          log('✅ เชื่อมต่อแล้ว (answer)');
-        }
-      });
-
-      unsubCallee = roomRef.collection('calleeCandidates').onSnapshot((snap)=>{
-        snap.docChanges().forEach((c)=>{ if(c.type==='added'){ pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); } });
-      });
-
-      show(lobbyCard,false); show(roomCard,true); log('🎉 ห้อง '+code+' ถูกสร้างแล้วและเข้าห้องอัตโนมัติ');
-    }catch(err){ console.error(err); alert('สร้างห้องไม่สำเร็จ: '+(err.message||err)); }
-  }
-
-  async function joinRoomByCode(){
-    try{
-      const code = (joinCode.value||'').trim(); if(code.length!==6) return alert('กรอกรหัส 6 หลัก');
-      roomRef = db.collection('rooms').doc(code); const snap = await roomRef.get(); if(!snap.exists) return alert('ไม่พบห้อง');
-
-      // เข้าห้องก่อน เพื่อไม่ให้ค้างหน้า join
-      roomLabel.textContent = code; show(lobbyCard,false); show(roomCard,true);
-
-      await createPeer(false);
-
-      const calleeCandidates = roomRef.collection('calleeCandidates');
-      pc.onicecandidate = (e)=>{ if(e.candidate) calleeCandidates.add(e.candidate.toJSON()); };
-
-      const data = snap.data();
-      await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-
-      const profile = { uid:auth.currentUser.uid, name:auth.currentUser.displayName||auth.currentUser.email };
-
-      await roomRef.update({
-        answer:{type:answer.type,sdp:answer.sdp},
-        members: firebase.firestore.FieldValue.arrayUnion(profile),
-        ["lastJoin."+profile.uid]: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      unsubCaller = roomRef.collection('callerCandidates').onSnapshot((snap)=>{
-        snap.docChanges().forEach((c)=>{ if(c.type==='added'){ pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); } });
-      });
-
-    }catch(err){ console.error(err); alert('เข้าห้องไม่สำเร็จ: '+(err.message||err)); }
-  }
-
-  function setMic(on){ if(!localStream) return; localStream.getAudioTracks().forEach(t=> t.enabled = on); micOn = on; btnToggleMic.textContent = on?'🔇 ปิดไมค์':'🎙️ เปิดไมค์'; log(on?'🎙️ เปิดไมค์':'🔇 ปิดไมค์'); }
-
-  async function leaveRoom(){
-    try{
-      setMic(false);
-      if(pc){ pc.getSenders().forEach(s=>{ try{s.track&&s.track.stop();}catch{} }); pc.close(); }
-      pc=null; if(unsubAnswer)unsubAnswer(); if(unsubCaller)unsubCaller(); if(unsubCallee)unsubCallee(); unsubAnswer=unsubCaller=unsubCallee=null;
-      if(createdByMe && roomRef){ try{ await roomRef.delete(); }catch{} }
-    } finally { show(roomCard,false); show(lobbyCard,true); log('👋 ออกจากห้องแล้ว'); }
-  }
-
-  // wire
-  btnCreate.onclick = createRoomAndJoin;
-  btnJoin.onclick   = joinRoomByCode;
-  btnCopy.onclick   = ()=> copy(roomCodeEl.textContent);
-  btnToggleMic.onclick = async ()=>{
-    try{
-      if(!localStream){
-        await ensureMic();
-        localStream.getAudioTracks().forEach(t=>{ try{ pc.addTrack(t, localStream); }catch{} });
+      if(!localStream){localStream=await ensureMic();}
+      const track=localStream.getAudioTracks()[0];
+      if(!micOn){
+        await audioSender?.replaceTrack(track);
+        track.enabled=true;
+        setMic(true);
+      }else{
+        track.enabled=false;
+        await audioSender?.replaceTrack(track);
+        setMic(false);
       }
-      setMic(!micOn);
-    }catch(e){ alert('เปิดไมค์ไม่สำเร็จ: '+(e.message||e)); }
+    }catch(e){alert('เปิดไมค์ไม่สำเร็จ: '+(e.message||e));}
   };
-  btnLeave.onclick  = leaveRoom;
 
-  // init
-  window.addEventListener('load', ()=>{ log('พร้อมใช้งาน (ต้องใช้บน HTTPS หรือ localhost)'); });
+  // TODO: implement createRoomAndJoin, joinRoomByCode, leaveRoom
   </script>
 </body>
 </html>
