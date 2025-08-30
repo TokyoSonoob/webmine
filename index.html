@@ -21,7 +21,7 @@
     .bigcode{font-size:28px;font-weight:800;letter-spacing:.12em}
     .status{white-space:pre-wrap;background:#0e162b;border:var(--bd);border-radius:12px;padding:10px;font-family:ui-monospace,Consolas,Monaco;min-height:64px}
     .hidden{display:none !important}
-    /* effects */
+    /* ✨ effects */
     .shine{position:relative;overflow:hidden}
     .shine::after{content:"";position:absolute;inset:-150% -30%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.18),transparent);transform:rotate(25deg);animation:shine 2.6s infinite}
     @keyframes shine{0%{transform:translateX(-120%) rotate(25deg)}100%{transform:translateX(120%) rotate(25deg)}}
@@ -118,20 +118,19 @@
     <div class="muted" style="text-align:center;margin-top:8px">Make by Purple Shop · Firebase Auth + Firestore Signaling · WebRTC (Audio)</div>
   </div>
 
-  <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
   'use strict';
-  // ===== 0) CONFIG (ของคุณ) =====
+  // ===== 0) CONFIG =====
   const firebaseConfig = {
     apiKey: "AIzaSyBswfpiFSZaeHaEKT0RQcsTJMlgdqN8j2A",
     authDomain: "webxxx-c2c15.firebaseapp.com",
     databaseURL: "https://webxxx-c2c15-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "webxxx-c2c15",
-    storageBucket: "webxxx-c2c15.appspot.com", // ✅ รูปแบบถูกต้อง
+    storageBucket: "webxxx-c2c15.appspot.com",
     messagingSenderId: "1067079003521",
     appId: "1:1067079003521:web:a3869d6f857e49fb490c80",
     measurementId: "G-7VGKRTCCSF"
@@ -141,15 +140,14 @@
   const app = firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db   = firebase.firestore();
-  // ให้ Firestore online เสมอ (กันเคส offline cache)
   db.enableNetwork().catch(()=>{});
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 
-  // ===== 2) helpers =====
+  // ===== 2) HELPERS =====
   const $ = (s)=>document.querySelector(s);
   const show = (el,on=true)=>el.classList.toggle('hidden',!on);
   const copy = (t)=>navigator.clipboard?.writeText(t).catch(()=>{});
-  const log = (m)=>{ const box=$('#status'); if(box){ box.textContent += "\\n"+m; box.scrollTop = box.scrollHeight; } console.log(m); };
+  const log = (m)=>{ const box=$('#status'); if(box){ box.textContent += "\n"+m; box.scrollTop = box.scrollHeight; } console.log(m); };
   if(location.protocol!=='https:' && location.hostname!=='localhost'){
     alert('ต้องเปิดผ่าน HTTPS หรือ localhost เพื่อใช้งานไมค์ครับ');
   }
@@ -215,30 +213,31 @@
     return localStream;
   };
 
-  async function createPeer(){
+  async function createPeer(capture=false){
     pc = new RTCPeerConnection(rtcConfig);
     remoteStream = new MediaStream();
     remoteAudioEl.srcObject = remoteStream;
 
-    pc.ontrack = (ev)=>{ try{ ev.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t)); }catch{}; remoteAudioEl.classList.remove('hidden'); log('📥 ได้รับเสียงจากคู่สนทนา'); };
-    pc.onconnectionstatechange = ()=> log('🔗 สถานะ: '+pc.connectionState);
+    pc.ontrack = (ev)=>{ try{ ev.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t)); }catch{}; remoteAudioEl.classList.remove('hidden'); };
+    pc.onconnectionstatechange = ()=> log('สถานะ: '+pc.connectionState);
 
-    const s = await ensureMic();
-    s.getAudioTracks().forEach(t=>{ t.enabled=false; pc.addTrack(t,s); });
+    if(capture){
+      const s = await ensureMic();
+      s.getAudioTracks().forEach(t=>{ t.enabled=false; pc.addTrack(t,s); });
+    } else {
+      try{ pc.addTransceiver('audio',{direction:'recvonly'}); }catch{}
+    }
   }
 
-  // === กดสร้าง → สุ่มรหัส → set ลง Firestore → เข้าอัตโนมัติ (ไม่เช็คซ้ำ) ===
+  // === สร้าง → บันทึก Firestore → เข้าอัตโนมัติ ===
   async function createRoomAndJoin(){
     try{
       const code = randRoomCode();
       roomRef = db.collection('rooms').doc(code);
 
-      createdByMe = true;
-      roomLabel.textContent = code;
-      roomCodeEl.textContent = code;
-      show(document.querySelector('#createdBox'), true);
+      createdByMe = true; roomLabel.textContent = code; roomCodeEl.textContent = code; show(document.querySelector('#createdBox'),true);
 
-      await createPeer();
+      await createPeer(true);
 
       const callerCandidates = roomRef.collection('callerCandidates');
       pc.onicecandidate = (e)=>{ if(e.candidate) callerCandidates.add(e.candidate.toJSON()); };
@@ -246,18 +245,14 @@
       const offer = await pc.createOffer({offerToReceiveAudio:1});
       await pc.setLocalDescription(offer);
 
-      // ❗ ห้ามใส่ serverTimestamp() ใน array
-      const profile = {
-        uid: auth.currentUser.uid,
-        name: auth.currentUser.displayName || auth.currentUser.email,
-      };
+      const profile = { uid:auth.currentUser.uid, name:auth.currentUser.displayName||auth.currentUser.email };
 
       await roomRef.set({
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        createdBy: { ...profile, joinedAt: firebase.firestore.FieldValue.serverTimestamp() }, // object ปกติ OK
+        createdBy: { ...profile, joinedAt: firebase.firestore.FieldValue.serverTimestamp() },
         offer: { type: offer.type, sdp: offer.sdp },
-        members: [ profile ], // array ไม่มี timestamp
-        lastJoin: { [profile.uid]: firebase.firestore.FieldValue.serverTimestamp() } // map เก็บเวลาเข้า
+        members: [ profile ],
+        lastJoin: { [profile.uid]: firebase.firestore.FieldValue.serverTimestamp() }
       });
 
       unsubAnswer = roomRef.onSnapshot(async (snap)=>{
@@ -272,26 +267,25 @@
         snap.docChanges().forEach((c)=>{ if(c.type==='added'){ pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); } });
       });
 
-      show(lobbyCard,false); show(roomCard,true);
-      log('🎉 ห้อง '+code+' ถูกสร้างแล้วและเข้าห้องอัตโนมัติ');
+      show(lobbyCard,false); show(roomCard,true); log('🎉 ห้อง '+code+' ถูกสร้างแล้วและเข้าห้องอัตโนมัติ');
     }catch(err){ console.error(err); alert('สร้างห้องไม่สำเร็จ: '+(err.message||err)); }
   }
 
   async function joinRoomByCode(){
     try{
-      const code=(joinCode.value||'').trim(); if(code.length!==6) return alert('กรอกรหัส 6 หลัก');
-      roomRef = db.collection('rooms').doc(code);
-      const snap = await roomRef.get(); if(!snap.exists) return alert('ไม่พบห้องนี้');
+      const code = (joinCode.value||'').trim(); if(code.length!==6) return alert('กรอกรหัส 6 หลัก');
+      roomRef = db.collection('rooms').doc(code); const snap = await roomRef.get(); if(!snap.exists) return alert('ไม่พบห้อง');
 
-      await createPeer();
+      // เข้าห้องก่อน เพื่อไม่ให้ค้างหน้า join
+      roomLabel.textContent = code; show(lobbyCard,false); show(roomCard,true);
+
+      await createPeer(false);
 
       const calleeCandidates = roomRef.collection('calleeCandidates');
       pc.onicecandidate = (e)=>{ if(e.candidate) calleeCandidates.add(e.candidate.toJSON()); };
 
-      const data = snap.data(); await pc.setRemoteDescription(new RTCSdpType(data.offer));
-    }catch(_){} // fallback RTCSdpType for some browsers
-      const data2 = (await roomRef.get()).data();
-      await pc.setRemoteDescription(new RTCSessionDescription(data2.offer));
+      const data = snap.data();
+      await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
 
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
@@ -299,24 +293,19 @@
       const profile = { uid:auth.currentUser.uid, name:auth.currentUser.displayName||auth.currentUser.email };
 
       await roomRef.update({
-        answer: { type: answer.type, sdp: answer.sdp },
+        answer:{type:answer.type,sdp:answer.sdp},
         members: firebase.firestore.FieldValue.arrayUnion(profile),
-        [`lastJoin.${profile.uid}`]: firebase.firestore.FieldValue.serverTimestamp()
+        ["lastJoin."+profile.uid]: firebase.firestore.FieldValue.serverTimestamp()
       });
 
       unsubCaller = roomRef.collection('callerCandidates').onSnapshot((snap)=>{
         snap.docChanges().forEach((c)=>{ if(c.type==='added'){ pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); } });
       });
 
-      roomLabel.textContent = code; show(lobbyCard,false); show(roomCard,true); log('🚪 เข้าห้องแล้ว');
+    }catch(err){ console.error(err); alert('เข้าห้องไม่สำเร็จ: '+(err.message||err)); }
   }
 
-  function setMic(on){
-    if(!localStream) return;
-    localStream.getAudioTracks().forEach(t=> t.enabled = on);
-    micOn = on; btnToggleMic.textContent = on?'🔇 ปิดไมค์':'🎙️ เปิดไมค์';
-    log(on?'🎙️ เปิดไมค์':'🔇 ปิดไมค์');
-  }
+  function setMic(on){ if(!localStream) return; localStream.getAudioTracks().forEach(t=> t.enabled = on); micOn = on; btnToggleMic.textContent = on?'🔇 ปิดไมค์':'🎙️ เปิดไมค์'; log(on?'🎙️ เปิดไมค์':'🔇 ปิดไมค์'); }
 
   async function leaveRoom(){
     try{
@@ -331,7 +320,15 @@
   btnCreate.onclick = createRoomAndJoin;
   btnJoin.onclick   = joinRoomByCode;
   btnCopy.onclick   = ()=> copy(roomCodeEl.textContent);
-  btnToggleMic.onclick = async ()=>{ if(!localStream){ try{ await ensureMic(); }catch{return;} } setMic(!micOn); };
+  btnToggleMic.onclick = async ()=>{
+    try{
+      if(!localStream){
+        await ensureMic();
+        localStream.getAudioTracks().forEach(t=>{ try{ pc.addTrack(t, localStream); }catch{} });
+      }
+      setMic(!micOn);
+    }catch(e){ alert('เปิดไมค์ไม่สำเร็จ: '+(e.message||e)); }
+  };
   btnLeave.onclick  = leaveRoom;
 
   // init
