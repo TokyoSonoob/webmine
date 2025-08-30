@@ -21,7 +21,7 @@
     .bigcode{font-size:28px;font-weight:800;letter-spacing:.12em}
     .status{white-space:pre-wrap;background:#0e162b;border:var(--bd);border-radius:12px;padding:10px;font-family:ui-monospace,Consolas,Monaco;min-height:64px}
     .hidden{display:none !important}
-    /* ✨ effect */
+    /* effects */
     .shine{position:relative;overflow:hidden}
     .shine::after{content:"";position:absolute;inset:-150% -30%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.18),transparent);transform:rotate(25deg);animation:shine 2.6s infinite}
     @keyframes shine{0%{transform:translateX(-120%) rotate(25deg)}100%{transform:translateX(120%) rotate(25deg)}}
@@ -118,19 +118,20 @@
     <div class="muted" style="text-align:center;margin-top:8px">Make by Purple Shop · Firebase Auth + Firestore Signaling · WebRTC (Audio)</div>
   </div>
 
+  <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
   'use strict';
-  // ===== 0) CONFIG (ใช้ของคุณ, แก้ storageBucket ให้ถูก) =====
+  // ===== 0) CONFIG (ของคุณ) =====
   const firebaseConfig = {
     apiKey: "AIzaSyBswfpiFSZaeHaEKT0RQcsTJMlgdqN8j2A",
     authDomain: "webxxx-c2c15.firebaseapp.com",
     databaseURL: "https://webxxx-c2c15-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "webxxx-c2c15",
-    storageBucket: "webxxx-c2c15.appspot.com",
+    storageBucket: "webxxx-c2c15.appspot.com", // ✅ รูปแบบถูกต้อง
     messagingSenderId: "1067079003521",
     appId: "1:1067079003521:web:a3869d6f857e49fb490c80",
     measurementId: "G-7VGKRTCCSF"
@@ -140,67 +141,51 @@
   const app = firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db   = firebase.firestore();
-// เผื่อกรณี SDK อยู่สถานะ offline (เช่น reload หลัง disableNetwork)
-db.enableNetwork().catch(()=>{});
+  // ให้ Firestore online เสมอ (กันเคส offline cache)
+  db.enableNetwork().catch(()=>{});
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 
   // ===== 2) helpers =====
   const $ = (s)=>document.querySelector(s);
   const show = (el,on=true)=>el.classList.toggle('hidden',!on);
   const copy = (t)=>navigator.clipboard?.writeText(t).catch(()=>{});
-  const log = (m)=>{ const box=$('#status'); if(box){ box.textContent += "\n"+m; box.scrollTop = box.scrollHeight; } console.log(m); };
+  const log = (m)=>{ const box=$('#status'); if(box){ box.textContent += "\\n"+m; box.scrollTop = box.scrollHeight; } console.log(m); };
   if(location.protocol!=='https:' && location.hostname!=='localhost'){
     alert('ต้องเปิดผ่าน HTTPS หรือ localhost เพื่อใช้งานไมค์ครับ');
   }
 
-  // sections
-  const registerCard = $('#registerCard');
-  const loginCard    = $('#loginCard');
-  const lobbyCard    = $('#lobbyCard');
-  const roomCard     = $('#roomCard');
-
-  // controls
-  const helloName = $('#helloName');
-  const btnRegister = $('#btnRegister');
-  const btnLogin    = $('#btnLogin');
-  const btnLogout   = $('#btnLogout');
-  const toLogin     = $('#toLogin');
-  const toRegister  = $('#toRegister');
-
-  const btnCreate = $('#btnCreate');
-  const btnJoin   = $('#btnJoin');
-  const btnCopy   = $('#btnCopy');
-  const joinCode  = $('#joinCode');
-
-  const btnToggleMic = $('#btnToggleMic');
-  const btnLeave     = $('#btnLeave');
-  const roomLabel    = $('#roomLabel');
-  const roomCodeEl   = $('#roomCode');
-
-  const remoteAudioEl = $('#remoteAudio');
+  // sections & controls
+  const registerCard=$('#registerCard'), loginCard=$('#loginCard'), lobbyCard=$('#lobbyCard'), roomCard=$('#roomCard');
+  const helloName=$('#helloName');
+  const btnCreate=$('#btnCreate'), btnJoin=$('#btnJoin'), btnCopy=$('#btnCopy');
+  const btnRegister=$('#btnRegister'), btnLogin=$('#btnLogin'), btnLogout=$('#btnLogout'), toLogin=$('#toLogin'), toRegister=$('#toRegister');
+  const joinCode=$('#joinCode'), btnToggleMic=$('#btnToggleMic'), btnLeave=$('#btnLeave'), roomLabel=$('#roomLabel'), roomCodeEl=$('#roomCode');
+  const remoteAudioEl=$('#remoteAudio');
 
   // ===== 3) AUTH =====
   toLogin.onclick = ()=>{ show(registerCard,false); show(loginCard,true); };
   toRegister.onclick = ()=>{ show(loginCard,false); show(registerCard,true); };
 
   btnRegister.onclick = async ()=>{
-    const email = $('#regEmail').value.trim();
-    const pass  = $('#regPass').value.trim();
-    const xbox  = $('#regXbox').value.trim();
+    const email=$('#regEmail').value.trim();
+    const pass=$('#regPass').value.trim();
+    const xbox=$('#regXbox').value.trim();
     if(!email||!pass||!xbox) return alert('กรอกข้อมูลให้ครบ');
     try{
-      const cred = await auth.createUserWithEmailAndPassword(email, pass);
-      await cred.user.updateProfile({ displayName: xbox });
-      await db.collection('users').doc(cred.user.uid).set({ email, xbox, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      const cred=await auth.createUserWithEmailAndPassword(email,pass);
+      await cred.user.updateProfile({displayName:xbox});
+      await db.collection('users').doc(cred.user.uid).set({
+        email, xbox, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
       alert('สมัครสำเร็จ! เข้าสู่ระบบให้แล้ว');
     }catch(err){ alert(err.message); }
   };
 
   btnLogin.onclick = async ()=>{
-    const email = $('#logEmail').value.trim();
-    const pass  = $('#logPass').value.trim();
+    const email=$('#logEmail').value.trim();
+    const pass=$('#logPass').value.trim();
     if(!email||!pass) return alert('กรอกอีเมลและรหัสผ่าน');
-    try{ await auth.signInWithEmailAndPassword(email, pass); }catch(err){ alert(err.message); }
+    try{ await auth.signInWithEmailAndPassword(email,pass); }catch(err){ alert(err.message); }
   };
 
   btnLogout.onclick = ()=> auth.signOut();
@@ -217,7 +202,8 @@ db.enableNetwork().catch(()=>{});
   // ===== 4) WEBRTC =====
   const rtcConfig = { iceServers:[{ urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302'] }], iceCandidatePoolSize:10 };
   let pc=null, localStream=null, remoteStream=null, roomRef=null;
-  let unsubAnswer=null, unsubCaller=null, unsubCallee=null; let createdByMe=false, micOn=false;
+  let unsubAnswer=null, unsubCaller=null, unsubCallee=null;
+  let createdByMe=false, micOn=false;
 
   const randRoomCode = ()=> (Math.floor(100000+Math.random()*900000)).toString();
 
@@ -238,70 +224,99 @@ db.enableNetwork().catch(()=>{});
     pc.onconnectionstatechange = ()=> log('🔗 สถานะ: '+pc.connectionState);
 
     const s = await ensureMic();
-    s.getAudioTracks().forEach(t=>{ t.enabled=false; pc.addTrack(t, s); });
+    s.getAudioTracks().forEach(t=>{ t.enabled=false; pc.addTrack(t,s); });
   }
 
+  // === กดสร้าง → สุ่มรหัส → set ลง Firestore → เข้าอัตโนมัติ (ไม่เช็คซ้ำ) ===
   async function createRoomAndJoin(){
     try{
       const code = randRoomCode();
       roomRef = db.collection('rooms').doc(code);
-// ข้ามการอ่านล่วงหน้าในกรณี offline เพื่อไม่ให้ throw
-try {
-  const exists = await roomRef.get();
-  if (exists.exists) return createRoomAndJoin();
-} catch (e) {
-  console.warn('skip exists-check (offline?)', e);
-}
 
-      createdByMe = true; roomLabel.textContent=code; roomCodeEl.textContent=code; show($('#createdBox'),true);
+      createdByMe = true;
+      roomLabel.textContent = code;
+      roomCodeEl.textContent = code;
+      show(document.querySelector('#createdBox'), true);
+
       await createPeer();
 
       const callerCandidates = roomRef.collection('callerCandidates');
       pc.onicecandidate = (e)=>{ if(e.candidate) callerCandidates.add(e.candidate.toJSON()); };
 
-      const offer = await pc.createOffer({ offerToReceiveAudio: 1 });
+      const offer = await pc.createOffer({offerToReceiveAudio:1});
       await pc.setLocalDescription(offer);
 
-      const profile = { uid:auth.currentUser.uid, name:auth.currentUser.displayName||auth.currentUser.email, ts:firebase.firestore.FieldValue.serverTimestamp() };
-      await roomRef.set({ createdAt: firebase.firestore.FieldValue.serverTimestamp(), createdBy: profile, offer:{type:offer.type,sdp:offer.sdp}, members:[profile] });
+      // ❗ ห้ามใส่ serverTimestamp() ใน array
+      const profile = {
+        uid: auth.currentUser.uid,
+        name: auth.currentUser.displayName || auth.currentUser.email,
+      };
+
+      await roomRef.set({
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdBy: { ...profile, joinedAt: firebase.firestore.FieldValue.serverTimestamp() }, // object ปกติ OK
+        offer: { type: offer.type, sdp: offer.sdp },
+        members: [ profile ], // array ไม่มี timestamp
+        lastJoin: { [profile.uid]: firebase.firestore.FieldValue.serverTimestamp() } // map เก็บเวลาเข้า
+      });
 
       unsubAnswer = roomRef.onSnapshot(async (snap)=>{
         const data=snap.data();
-        if(!pc.currentRemoteDescription && data && data.answer){ await pc.setRemoteDescription(new RTCSessionDescription(data.answer)); log('✅ เชื่อมต่อแล้ว (answer)'); }
+        if(!pc.currentRemoteDescription && data && data.answer){
+          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+          log('✅ เชื่อมต่อแล้ว (answer)');
+        }
       });
 
       unsubCallee = roomRef.collection('calleeCandidates').onSnapshot((snap)=>{
         snap.docChanges().forEach((c)=>{ if(c.type==='added'){ pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); } });
       });
 
-      show(lobbyCard,false); show(roomCard,true); log('🎉 สร้างห้องและรอเพื่อน…');
+      show(lobbyCard,false); show(roomCard,true);
+      log('🎉 ห้อง '+code+' ถูกสร้างแล้วและเข้าห้องอัตโนมัติ');
     }catch(err){ console.error(err); alert('สร้างห้องไม่สำเร็จ: '+(err.message||err)); }
   }
 
   async function joinRoomByCode(){
     try{
-      const code = (joinCode.value||'').trim(); if(code.length!==6) return alert('กรอกรหัส 6 หลัก');
-      roomRef = db.collection('rooms').doc(code); const snap = await roomRef.get(); if(!snap.exists) return alert('ไม่พบห้องนี้');
+      const code=(joinCode.value||'').trim(); if(code.length!==6) return alert('กรอกรหัส 6 หลัก');
+      roomRef = db.collection('rooms').doc(code);
+      const snap = await roomRef.get(); if(!snap.exists) return alert('ไม่พบห้องนี้');
 
       await createPeer();
+
       const calleeCandidates = roomRef.collection('calleeCandidates');
       pc.onicecandidate = (e)=>{ if(e.candidate) calleeCandidates.add(e.candidate.toJSON()); };
 
-      const data = snap.data(); await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-      const answer = await pc.createAnswer(); await pc.setLocalDescription(answer);
+      const data = snap.data(); await pc.setRemoteDescription(new RTCSdpType(data.offer));
+    }catch(_){} // fallback RTCSdpType for some browsers
+      const data2 = (await roomRef.get()).data();
+      await pc.setRemoteDescription(new RTCSessionDescription(data2.offer));
 
-      const profile = { uid:auth.currentUser.uid, name:auth.currentUser.displayName||auth.currentUser.email, ts:firebase.firestore.FieldValue.serverTimestamp() };
-      await roomRef.update({ answer:{type:answer.type,sdp:answer.sdp}, members: firebase.firestore.FieldValue.arrayUnion(profile) });
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      const profile = { uid:auth.currentUser.uid, name:auth.currentUser.displayName||auth.currentUser.email };
+
+      await roomRef.update({
+        answer: { type: answer.type, sdp: answer.sdp },
+        members: firebase.firestore.FieldValue.arrayUnion(profile),
+        [`lastJoin.${profile.uid}`]: firebase.firestore.FieldValue.serverTimestamp()
+      });
 
       unsubCaller = roomRef.collection('callerCandidates').onSnapshot((snap)=>{
         snap.docChanges().forEach((c)=>{ if(c.type==='added'){ pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); } });
       });
 
       roomLabel.textContent = code; show(lobbyCard,false); show(roomCard,true); log('🚪 เข้าห้องแล้ว');
-    }catch(err){ console.error(err); alert('เข้าห้องไม่สำเร็จ: '+(err.message||err)); }
   }
 
-  function setMic(on){ if(!localStream) return; localStream.getAudioTracks().forEach(t=> t.enabled = on); micOn = on; btnToggleMic.textContent = on?'🔇 ปิดไมค์':'🎙️ เปิดไมค์'; log(on?'🎙️ เปิดไมค์':'🔇 ปิดไมค์'); }
+  function setMic(on){
+    if(!localStream) return;
+    localStream.getAudioTracks().forEach(t=> t.enabled = on);
+    micOn = on; btnToggleMic.textContent = on?'🔇 ปิดไมค์':'🎙️ เปิดไมค์';
+    log(on?'🎙️ เปิดไมค์':'🔇 ปิดไมค์');
+  }
 
   async function leaveRoom(){
     try{
